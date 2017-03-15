@@ -1,7 +1,11 @@
 #!/bin/bash
+# CONFIGURE THESE BEFORE YOU BEGIN
+localNet=192.168.1.0/24 # this is the ip address of your home network.  The /24 means that all machines are included.
+host=https://webvpn.mycompany.co.uk # The name of the vpn server
+netdev=eth0 # This is the default name of your ethernet port.  Change to your wifi port (often wlan0) if you are not wired.
+#########################################################################################
 
 OPTIND=1
-host=https://webvpn.rhul.ac.uk
 
 print_help() {
 cat << EOF
@@ -49,5 +53,5 @@ f5fpc -b -s -x -t $host
 while ! f5fpc -i | grep -q 443 ; do
     sleep 1
 done
-ip route add 192.168.1.0/24 dev eth0
+ip route add $localNet dev $netdev
 exit 0
