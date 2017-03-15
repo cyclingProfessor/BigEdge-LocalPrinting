@@ -1,0 +1,53 @@
+#!/bin/bash
+
+OPTIND=1
+host=https://webvpn.rhul.ac.uk
+
+print_help() {
+cat << EOF
+Usage: vpn [-s] [-o] [-i] [-h?] [-t host]
+    -s for Connect to VPN server
+    -o for Disconnect
+    -?, -h print this help message
+    If no arguments are given then Connect is assumed
+EOF
+}
+
+while getopts ":hsoit" opt; do
+  case "$opt" in
+    h) print_help
+      exit 0
+      ;;
+    i) f5fpc -i
+      exit 0
+      ;;
+    o) f5fpc -o
+      exit 0
+      ;;
+    t) host =$OPTARG
+      ;;
+    :) echo "Missing option argument for -$OPTARG" >&2
+       print_help
+       exit 1
+       ;;
+    \?) echo "Unimplemented option: -$OPTARG" >&2; 
+       print_help
+       exit 1
+       ;;
+  esac
+done
+shift $(expr $OPTIND - 1 )
+if test $# -gt 0; then
+   echo "Invalid positional parameter given: $1" >&2
+   print_help
+   exit 1
+fi
+
+
+# Got here means that we are connecting
+f5fpc -b -s -x -t $host
+while ! f5fpc -i | grep -q 443 ; do
+    sleep 1
+done
+ip route add 192.168.1.0/24 dev eth0
+exit 0
